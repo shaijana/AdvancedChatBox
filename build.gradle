@@ -1,22 +1,23 @@
 plugins {
-	id 'fabric-loom' version '1.6-SNAPSHOT'
+	id 'fabric-loom' version '1.8-SNAPSHOT'
 	id 'maven-publish'
-	id "io.freefair.lombok" version "8.4"
+	id "io.freefair.lombok" version "8.6"
 }
 
-apply from: 'https://raw.githubusercontent.com/DarkKronicle/GradleScripts/main/gradle/publish.gradle'
-
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
-
-archivesBaseName = project.archives_base_name
 version = "${project.minecraft_version}-${project.mod_version}"
 group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
 
 repositories {
 	mavenCentral()
 	maven { url 'https://masa.dy.fi/maven' }
 	maven { url 'https://jitpack.io' }
+	maven { url 'https://repo.fabim.de/repository/maven-public/' }
+	maven { url 'https://jitpack.io' }
+	maven { url 'https://repo.fabim.de/repository/maven-public/' }
 }
 
 dependencies {
@@ -62,41 +63,40 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.encoding = "UTF-8"
 	it.options.release = 21
 }
 
-tasks.register('sourcesJar', Jar) {
-	dependsOn classes
-	archiveClassifier = "sources"
-	from sourceSets.main.allSource
-}
-
 java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
+
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
-	from "LICENSE.txt"
+	from("LICENSE") {
+		rename { "${it}_${project.base.archivesName.get()}" }
+	}
 }
 
 // configure the maven publication
 publishing {
 	publications {
-		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+		create("mavenJava", MavenPublication) {
+			artifactId = project.archives_base_name
+			from components.java
 		}
 	}
 
 	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-
+		maven {
+			name = "fabimRepo"
+			url = uri("https://repo.fabim.de/repository/maven-mixed/")
+			credentials(PasswordCredentials.class)
+		}
 	}
 }
