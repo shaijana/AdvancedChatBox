@@ -26,7 +26,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 	modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.minecraft_version}:${project.malilib_version}"
-	modImplementation "io.github.darkkronicle:AdvancedChatCore:${project.minecraft_version}-${project.advancedchat_version}"
+	modImplementation "de.fabim:AdvancedChatCore:${project.minecraft_version}-${project.advancedchat_version}"
 	// only used to build the mod locally
 
 	modCompileOnly "org.mariuszgromada.math:MathParser.org-mXparser:${project.mxparser_version}"
